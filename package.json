@@ -1,0 +1,29 @@
+{
+  "name": "svg-gobbler-scripts",
+  "description": "Centralized scripts for svg-gobbler packages.",
+  "version": "1.0.0",
+  "repository": "https://github.com/rossmoody/svg-gobbler-scripts.git",
+  "author": "rossmoody <ross@rossmoody.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "rollup": "rollup -c --bundleConfigAsCjs"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "prettier": "^3.1.0",
+    "rollup": "^4.6.1",
+    "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "nanoid": "^5.0.4"
+  }
+}
