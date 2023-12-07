@@ -22,7 +22,12 @@ export default [
         sourcemap: true,
       },
     ],
-    plugins: [external(), resolve(), commonjs(), typescript({ tsconfig: './tsconfig.json' })],
+    plugins: [
+      external(),
+      commonjs(),
+      resolve({ browser: true }),
+      typescript({ tsconfig: './tsconfig.json' }),
+    ],
   },
   {
     input: 'dist/esm/types/index.d.ts',

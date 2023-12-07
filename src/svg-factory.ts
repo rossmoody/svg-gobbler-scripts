@@ -8,11 +8,11 @@ import { PageData, SvgType } from './types'
 /**
  * The SVG factory will process the page data and return an array of SVG objects.
  */
-export class SvgFactory {
+class SvgFactory {
   /**
    * Process the page data and return an array of SVG objects.
    */
-  static async process(message: PageData | null) {
+  async process(message: PageData | null) {
     if (!message) {
       return []
     }
@@ -37,20 +37,22 @@ export class SvgFactory {
       }
     })
 
-    processedData = await Promise.all(
-      processedData.map((item) => {
-        if (item instanceof Image) {
-          return item.fetchSvgContent()
-        }
-        return item
-      }),
-    ).catch(() => {
-      return processedData
+    const svgs: SvgType[] = []
+    const promises: Promise<Image>[] = []
+
+    processedData.forEach((item) => {
+      if (item instanceof Image) {
+        promises.push(item.fetchSvgContent())
+      }
+      svgs.push(item as SvgType)
     })
+
+    const resolvedPromises = await Promise.all(promises)
+    let finalData = [...svgs, ...resolvedPromises]
 
     // Must do one final pass after async requests to break apart remote
     // SVG sprites into their individual SVGs, symbols, or g elements
-    processedData = processedData
+    finalData = finalData
       .filter((item) => item && item?.isValid)
       .flatMap((item) => {
         if (item instanceof Image) {
@@ -72,6 +74,8 @@ export class SvgFactory {
         return item
       })
 
-    return processedData as SvgType[]
+    return finalData as SvgType[]
   }
 }
+
+export const svgFactory = new SvgFactory()
