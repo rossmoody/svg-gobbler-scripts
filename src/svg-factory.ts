@@ -1,80 +1,78 @@
-import { GElement } from '@/svg-classes/g-element'
-import { Image } from '@/svg-classes/image'
-import { Inline } from '@/svg-classes/inline'
-import { SvgSymbol } from '@/svg-classes/symbol'
+import { GElement } from '@/classes/g-element'
+import { Image } from '@/classes/image'
+import { Inline } from '@/classes/inline'
+import { SvgSymbol } from '@/classes/symbol'
 import { nanoid } from 'nanoid'
-import { PageData, SvgType } from './types'
+import { DocumentData, SvgType } from './types'
 
 /**
- * The SVG factory will process the page data and return an array of SVG objects.
+ * The primary SVG factory that processes document data and returns an array of SVG classes.
  */
 class SvgFactory {
   /**
-   * Process the page data and return an array of SVG objects.
+   * Process the page data and return an array of SVG classes.
    */
-  async process(message: PageData | null) {
+  async process(message: DocumentData | null): Promise<SvgType[]> {
     if (!message) {
       return []
     }
 
-    let processedData = message.data.map(({ svg, id }) => {
-      switch (true) {
-        case svg.includes('<svg '): {
-          return new Inline(svg, id)
-        }
+    const initialData: SvgType[] = message.data
+      .map(({ svg, id }) => this.createSvgElement(svg, id, message.origin))
+      .filter((item): item is SvgType => item !== undefined)
 
-        case svg.includes('<symbol '): {
-          return new SvgSymbol(svg, id)
-        }
+    const promises = initialData.map((item) =>
+      item instanceof Image ? item.fetchSvgContent() : Promise.resolve(item),
+    )
 
-        case svg.includes('<g '): {
-          return new GElement(svg, id)
-        }
+    return this.processAsyncData(await Promise.all(promises))
+  }
 
-        case svg.includes('<img '): {
-          return new Image(svg, id, message.origin)
-        }
-      }
+  private createSvgElement(svg: string, id: string, origin?: string): SvgType | undefined {
+    if (svg.includes('<svg ')) {
+      return new Inline(svg, id)
+    }
+    if (svg.includes('<symbol ')) {
+      return new SvgSymbol(svg, id)
+    }
+    if (svg.includes('<g ')) {
+      return new GElement(svg, id)
+    }
+    if (svg.includes('<img ')) {
+      return new Image(svg, id, origin ?? '')
+    }
+  }
+
+  /**
+   * Filter out any invalid SVGs and expand any images into their constituent parts.
+   */
+  private processAsyncData(data: SvgType[]): SvgType[] {
+    return data
+      .filter((item) => item && item.isValid)
+      .flatMap((item) => this.expandImageToElements(item))
+  }
+
+  /**
+   * This is a helper function to extract the symbol and g elements from an image
+   * after it has been fetched. This is necessary because the image element is
+   * not in the DOM and therefore cannot be queried.
+   */
+  private expandImageToElements(item: SvgType): SvgType[] {
+    if (item instanceof Image) {
+      const results: SvgType[] = [item]
+      this.extractAndPushElements(item, 'symbol', results)
+      this.extractAndPushElements(item, 'g', results)
+      return results
+    }
+    return [item]
+  }
+
+  private extractAndPushElements(image: Image, selector: 'symbol' | 'g', results: SvgType[]): void {
+    const elements = image.asElement?.querySelectorAll(selector)
+    elements?.forEach((element) => {
+      const constructor = selector === 'symbol' ? SvgSymbol : GElement
+      results.push(new constructor(element.outerHTML, nanoid()))
     })
-
-    const svgs: SvgType[] = []
-    const promises: Promise<Image>[] = []
-
-    processedData.forEach((item) => {
-      if (item instanceof Image) {
-        promises.push(item.fetchSvgContent())
-      }
-      svgs.push(item as SvgType)
-    })
-
-    const resolvedPromises = await Promise.all(promises)
-    let finalData = [...svgs, ...resolvedPromises]
-
-    // Must do one final pass after async requests to break apart remote
-    // SVG sprites into their individual SVGs, symbols, or g elements
-    finalData = finalData
-      .filter((item) => item && item?.isValid)
-      .flatMap((item) => {
-        if (item instanceof Image) {
-          const results = [item] as SvgType[]
-
-          const symbols = item.asElement?.querySelectorAll('symbol')
-          symbols?.forEach((symbol) => {
-            results.push(new SvgSymbol(symbol.outerHTML, nanoid()))
-          })
-
-          const gElements = item.asElement?.querySelectorAll('g')
-          gElements?.forEach((gElement) => {
-            results.push(new GElement(gElement.outerHTML, nanoid()))
-          })
-
-          return results
-        }
-
-        return item
-      })
-
-    return finalData as SvgType[]
   }
 }
 

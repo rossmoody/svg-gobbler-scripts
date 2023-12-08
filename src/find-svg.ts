@@ -1,8 +1,15 @@
+import type { DocumentData } from './types'
+
 /**
- * Gathers all relevant SVG data from the active tab. Must be isolated self containing
+ * Gathers all relevant SVG data from a given document. Must be isolated self containing
  * function to make Chrome Manifest V3 security happy.
  */
-export function findSvg() {
+export function findSvg(documentParam?: Document): DocumentData {
+  /**
+   * The document to search for SVGs. Defaults to window.document.
+   */
+  const document = documentParam ?? window.document
+
   /**
    * Helper function to quickly create a new image, set the src, and return the outerHTML
    * created by it. We must do this because security is quite strict on what we can access
@@ -187,8 +194,8 @@ export function findSvg() {
   ]
 
   return {
-    data,
-    host: document.location.host,
-    origin: document.location.origin,
+    data: data.map((svg) => ({ id: crypto.randomUUID(), svg })),
+    host: document.location?.host ?? '',
+    origin: document.location?.origin ?? '',
   }
 }

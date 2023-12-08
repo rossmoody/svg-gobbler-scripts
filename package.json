@@ -1,7 +1,7 @@
 {
   "name": "svg-gobbler-scripts",
-  "description": "Centralized scripts for svg-gobbler packages.",
-  "version": "1.0.6",
+  "description": "Centralized SVG processing scripts for svg-gobbler initiatives.",
+  "version": "1.1.0",
   "repository": "https://github.com/rossmoody/svg-gobbler-scripts.git",
   "author": "rossmoody <ross@rossmoody.com>",
   "license": "MIT",
