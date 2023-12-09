@@ -13,15 +13,19 @@ export class GElement extends Svg {
   }
 
   private processG() {
-    const g = this.parseFromString()
-    if (!g) return
-
-    const viewBox = g.getAttribute('viewBox')
-    g.removeAttribute('viewBox') // Cleanup useless viewBox
+    const offDomContainer = document.createElement('div')
+    offDomContainer.style.visibility = 'hidden'
+    document.body.appendChild(offDomContainer)
 
     const svg = this.createSvgElement()
-    svg.setAttribute('viewBox', viewBox ?? '0 0 24 24')
-    svg.appendChild(g)
+    offDomContainer.appendChild(svg)
+    svg.innerHTML = this.originalString
+
+    const gElement = svg.querySelector('g') as SVGGElement
+    const bBox = gElement.getBBox()
+    document.body.removeChild(offDomContainer)
+
+    svg.setAttribute('viewBox', `${bBox.x} ${bBox.y} ${bBox.width} ${bBox.height}`)
 
     this.asElement = svg
     this.originalString = svg.outerHTML

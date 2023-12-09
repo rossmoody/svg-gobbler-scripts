@@ -1,7 +1,7 @@
 {
   "name": "svg-gobbler-scripts",
   "description": "Centralized SVG processing scripts for svg-gobbler initiatives.",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "repository": "https://github.com/rossmoody/svg-gobbler-scripts.git",
   "author": "rossmoody <ross@rossmoody.com>",
   "license": "MIT",
@@ -10,7 +10,7 @@
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "rollup": "rollup -c --bundleConfigAsCjs"
+    "rollup": "rollup -c --bundleConfigAsCjs --watch"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
