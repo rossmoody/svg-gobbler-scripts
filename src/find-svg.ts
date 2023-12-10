@@ -15,6 +15,8 @@ export function findSvg(documentParam?: Document): DocumentData {
    * created by it. We must do this because security is quite strict on what we can access
    * from the client page so this strips out all the sensitive data.
    *
+   * We also centralize the async srcs, base64 srcs, and data urls to one element type.
+   *
    */
   const createImage = (src: string) => {
     const image = new Image()
@@ -57,15 +59,17 @@ export function findSvg(documentParam?: Document): DocumentData {
   }
 
   const gatherInlineSvgElements = () => {
-    return [...document.querySelectorAll('svg:not(:has(use))')].map((element) => element.outerHTML)
+    return [...document.querySelectorAll('svg')]
+      .filter((svg) => !svg.querySelector('use, symbol'))
+      .map(({ outerHTML }) => outerHTML)
   }
 
   const gatherGElements = () => {
-    return [...document.querySelectorAll('g')].map((element) => element.outerHTML)
+    return [...document.querySelectorAll('g')].map(({ outerHTML }) => outerHTML)
   }
 
   const gatherSymbolElements = () => {
-    return [...document.querySelectorAll('symbol')].map((element) => element.outerHTML)
+    return [...document.querySelectorAll('symbol')].map(({ outerHTML }) => outerHTML)
   }
 
   const gatherUseElements = () => {

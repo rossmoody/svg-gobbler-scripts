@@ -13,33 +13,54 @@ class SvgFactory {
    * Process the page data and return an array of SVG classes.
    */
   async process(message: DocumentData | null): Promise<SvgType[]> {
+    // If there's no message for whatever reason, return an empty array
     if (!message) {
       return []
     }
 
+    // Create SVG elements from the message data
     const initialData: SvgType[] = message.data
       .map(({ svg, id }) => this.createSvgElement(svg, id, message.origin))
-      .filter((item): item is SvgType => item !== undefined)
+      .filter((item): item is SvgType => !!item)
 
+    // If an item is an Image, fetch its SVG content; otherwise, leave it as is
     const promises = initialData.map((item) =>
       item instanceof Image ? item.fetchSvgContent() : Promise.resolve(item),
     )
 
-    return this.processAsyncData(await Promise.all(promises))
+    // Wait for all promises to resolve
+    const resolvedData = await Promise.all(promises)
+
+    // Process the resolved data and remove duplicates
+    const uniqueData = [...new Set(this.processAsyncData(resolvedData))]
+
+    return uniqueData
   }
 
-  private createSvgElement(svg: string, id: string, origin?: string): SvgType | undefined {
-    if (svg.includes('<svg ')) {
-      return new Inline(svg, id)
-    }
-    if (svg.includes('<symbol ')) {
-      return new SvgSymbol(svg, id)
-    }
-    if (svg.includes('<g ')) {
-      return new GElement(svg, id)
-    }
-    if (svg.includes('<img ')) {
-      return new Image(svg, id, origin ?? '')
+  /**
+   * Process a single SVG element and return an SVG class.
+   */
+  private createSvgElement(svg: string, id: string, origin?: string): SvgType | null {
+    try {
+      const parser = new DOMParser()
+      const doc = parser.parseFromString(svg, 'image/svg+xml')
+      const { tagName } = doc.documentElement
+
+      switch (tagName) {
+        case 'svg':
+          return new Inline(svg, id)
+        case 'symbol':
+          return new SvgSymbol(svg, id)
+        case 'g':
+          return new GElement(svg, id)
+        case 'img':
+          return new Image(svg, id, origin ?? '')
+        default:
+          return null
+      }
+    } catch (error) {
+      console.error(error)
+      return null
     }
   }
 
