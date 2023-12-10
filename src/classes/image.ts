@@ -17,26 +17,17 @@ export class Image extends Svg {
   constructor(originalString: string, id: string, origin: string) {
     super(originalString, id)
     this.origin = origin
-    this.parseAndSetElement()
     this.processImage()
   }
 
-  /**
-   * I don't love setting properties in a method, but I'm not sure
-   * how else to do this. I need to be able to await the async processImage
-   * method, but I can't do that in the constructor elegantly.
-   */
   processImage() {
-    if (!this.asElement) return
-
-    const src = this.asElement.getAttribute('src')
-    if (!src) return
+    const src = this.originalString.match(/src="([^"]*)"/)?.[1] ?? ''
 
     switch (true) {
       // Base 64
       case src.includes('data:image/svg+xml;base64'): {
         const base64Index = src.indexOf(',') + 1
-        const base64String = src.slice(base64Index, src.length - 1) // -1 to exclude the trailing quote
+        const base64String = src.slice(base64Index, src.length)
         this.originalString = this.base64DecodeUnicode(base64String)
         this.asElement = this.parseFromString()
         break
@@ -62,7 +53,8 @@ export class Image extends Svg {
 
       // Need to fetch asynchronously
       case src.includes('.svg'): {
-        this.absoluteImageUrl = this.getAbsoluteImageSrc(src)
+        this.parseAndSetElement()
+        this.absoluteImageUrl = this.getAbsoluteImageSrc()
         break
       }
     }
@@ -71,7 +63,8 @@ export class Image extends Svg {
   /**
    * Creates an absolute URL from the image src of an image element.
    */
-  private getAbsoluteImageSrc(src: string) {
+  private getAbsoluteImageSrc() {
+    const src = this.asElement?.getAttribute('src') ?? ''
     return src.startsWith('http') ? src : `${this.origin.replace(/\/$/, '')}${src}`
   }
 
