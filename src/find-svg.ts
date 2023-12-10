@@ -34,24 +34,34 @@ export function findSvg(documentParam?: Document): DocumentData {
     elements.forEach((element) => {
       if (element instanceof HTMLImageElement && element.src.includes('.svg')) {
         results.push(createImage(element.src))
+        return
       }
 
       const backgroundImage = window.getComputedStyle(element).backgroundImage
       if (element instanceof HTMLElement && backgroundImage.includes('.svg')) {
         const url = backgroundImage.slice(5, -2)
         results.push(createImage(url))
+        return
+      }
+
+      if (element instanceof HTMLImageElement && element.src.includes('data:image/svg+xml')) {
+        results.push(createImage(element.src))
+        return
       }
 
       if (element instanceof HTMLObjectElement && element.type === 'image/svg+xml') {
         results.push(createImage(element.data))
+        return
       }
 
       if (element instanceof HTMLEmbedElement && element.type === 'image/svg+xml') {
         results.push(createImage(element.src))
+        return
       }
 
       if (element instanceof HTMLIFrameElement && element.src.includes('.svg')) {
         results.push(createImage(element.src))
+        return
       }
     })
 
