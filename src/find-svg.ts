@@ -15,6 +15,8 @@ export function findSvg(documentParam?: Document): DocumentData {
    * created by it. We must do this because security is quite strict on what we can access
    * from the client page so this strips out all the sensitive data.
    *
+   * We also centralize the async srcs, base64 srcs, and data urls to one element type.
+   *
    */
   const createImage = (src: string) => {
     const image = new Image()
@@ -56,111 +58,18 @@ export function findSvg(documentParam?: Document): DocumentData {
     return results
   }
 
-  /**
-   * Find all the inline svg elements that are not sprite instances or sprite sources
-   */
   const gatherInlineSvgElements = () => {
-    const results: string[] = []
-    const elements = document.querySelectorAll('svg:not(:has(use))') as NodeListOf<SVGSVGElement>
-
-    /**
-     * An earnest effort to set a viewBox so we can handle resizing and displaying the SVGs.
-     * Returns a clone of the SVG.
-     */
-    const tryToSetViewBox = (svg: SVGElement) => {
-      const cloneSvg = svg.cloneNode(true) as SVGSVGElement
-      const viewBox = cloneSvg.getAttribute('viewBox')
-
-      if (viewBox) {
-        return cloneSvg.outerHTML // Success, early return
-      }
-
-      const height = cloneSvg.getAttribute('height')?.replace('px', '')
-      const width = cloneSvg.getAttribute('width')?.replace('px', '')
-
-      if (height && width) {
-        cloneSvg.setAttribute('viewBox', `0 0 ${width} ${height}`)
-        return cloneSvg.outerHTML // Meh, but we'll take it
-      }
-
-      const boundingBox = cloneSvg.getBBox()
-      cloneSvg.setAttribute(
-        'viewBox',
-        `${boundingBox.x} ${boundingBox.y} ${boundingBox.width} ${boundingBox.height}`,
-      )
-      return cloneSvg.outerHTML
-    }
-
-    elements.forEach((element) => {
-      results.push(tryToSetViewBox(element))
-    })
-
-    return results
+    return [...document.querySelectorAll('svg')]
+      .filter((svg) => !svg.querySelector('use, symbol'))
+      .map(({ outerHTML }) => outerHTML)
   }
 
   const gatherGElements = () => {
-    const results: string[] = []
-    const elements = document.querySelectorAll('g')
-
-    elements.forEach((element) => {
-      const svg = element.closest('svg')
-      const gClone = element.cloneNode(true) as SVGGElement
-
-      /**
-       * Setting a viewBox here is meaningless to the element, but
-       * we parse and remove it later in the class constructor.
-       */
-      const viewBox = svg?.getAttribute('viewBox')
-      if (viewBox) {
-        gClone.setAttribute('viewBox', viewBox)
-        return results.push(gClone.outerHTML)
-      }
-
-      const width = svg?.getAttribute('width')?.replace('px', '')
-      const height = svg?.getAttribute('height')?.replace('px', '')
-      if (width && height) {
-        gClone.setAttribute('viewBox', `0 0 ${width} ${height}`)
-        return results.push(gClone.outerHTML)
-      }
-
-      const boundingBox = element.getBBox()
-      gClone.setAttribute(
-        'viewBox',
-        `${boundingBox.x} ${boundingBox.y} ${boundingBox.width} ${boundingBox.height}`,
-      )
-
-      results.push(gClone.outerHTML)
-    })
-
-    return results
+    return [...document.querySelectorAll('g')].map(({ outerHTML }) => outerHTML)
   }
 
   const gatherSymbolElements = () => {
-    const results: string[] = []
-    const elements = document.querySelectorAll('symbol')
-
-    elements.forEach((element) => {
-      if (element.getAttribute('viewBox')) {
-        return results.push(element.outerHTML)
-      }
-
-      const svgViewBox = element.closest('svg')?.getAttribute('viewBox')
-      if (svgViewBox) {
-        const cloneElement = element.cloneNode(true) as SVGElement
-        cloneElement.setAttribute('viewBox', svgViewBox)
-        return results.push(cloneElement.outerHTML)
-      }
-
-      const height = element.getAttribute('height')
-      const width = element.getAttribute('width')
-      if (height && width) {
-        const cloneElement = element.cloneNode(true) as SVGElement
-        cloneElement.setAttribute('viewBox', `0 0 ${width} ${height}`)
-        return results.push(cloneElement.outerHTML)
-      }
-    })
-
-    return results
+    return [...document.querySelectorAll('symbol')].map(({ outerHTML }) => outerHTML)
   }
 
   const gatherUseElements = () => {

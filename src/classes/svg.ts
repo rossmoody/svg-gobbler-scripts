@@ -95,20 +95,11 @@ export class Svg {
    * This is used to display the SVG in the DOM and export PNG for scaling.
    */
   get presentationSvg(): string {
-    const elementClone = this.asElement?.cloneNode(true) as SVGElement
-    const width = elementClone.getAttribute('width')
-    const height = elementClone.getAttribute('height')
-    const viewBox = elementClone.getAttribute('viewBox')
-
-    elementClone.removeAttribute('height')
-    elementClone.removeAttribute('width')
-    elementClone.removeAttribute('class') // Tailwind conflicts
-    elementClone.removeAttribute('style') // Risky, may remove
-
-    if (!viewBox && width && height) {
-      elementClone.setAttribute('viewBox', `0 0 ${width} ${height}`)
-    }
-
-    return elementClone.outerHTML
+    const clone = this.asElement?.cloneNode(true) as SVGElement
+    clone.removeAttribute('height')
+    clone.removeAttribute('width')
+    clone.removeAttribute('class') // Tailwind conflicts
+    clone.removeAttribute('style') // Risky, may remove
+    return clone.outerHTML
   }
 }

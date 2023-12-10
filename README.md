@@ -18,7 +18,7 @@ This extension is available on:
 
 SVG Gobbler is a website and browser extension that finds the SVG content in your current tab and
 lets you optimize, download, copy, edit, or export. This repository is the shared scripts that power
-the extension and the website.
+the extension and the [website](https://svggobbler.com).
 
 ## Installation
 
