@@ -14,8 +14,8 @@ export class Image extends Svg {
    */
   origin: string
 
-  constructor(originalString: string, id: string, origin: string) {
-    super(originalString, id)
+  constructor(originalString: string, id: string, origin: string, lastModified: string) {
+    super(originalString, id, lastModified)
     this.origin = origin
     this.processImage()
   }

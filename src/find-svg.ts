@@ -113,8 +113,12 @@ export function findSvg(documentParam?: Document): DocumentData {
   ]
 
   return {
-    data: data.map((svg) => ({ id: crypto.randomUUID(), svg })),
     host: document.location?.host ?? '',
     origin: document.location?.origin ?? '',
+    data: data.map((svgString) => ({
+      id: crypto.randomUUID(),
+      lastEdited: new Date().toISOString(),
+      svg: svgString,
+    })),
   }
 }

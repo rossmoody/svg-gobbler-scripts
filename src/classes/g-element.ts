@@ -1,8 +1,8 @@
 import { Svg } from './svg'
 
 export class GElement extends Svg {
-  constructor(originalString: string, id: string) {
-    super(originalString, id)
+  constructor(originalString: string, id: string, lastModified: string) {
+    super(originalString, id, lastModified)
     this.removeXlinkHref()
     this.processG()
   }

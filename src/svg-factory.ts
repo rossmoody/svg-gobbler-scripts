@@ -2,7 +2,6 @@ import { GElement } from '@/classes/g-element'
 import { Image } from '@/classes/image'
 import { Inline } from '@/classes/inline'
 import { SvgSymbol } from '@/classes/symbol'
-import { nanoid } from 'nanoid'
 import { DocumentData, SvgType } from './types'
 
 /**
@@ -20,7 +19,10 @@ class SvgFactory {
 
     // Create SVG elements from the message data
     const initialData: SvgType[] = message.data
-      .map(({ svg, id }) => this.createSvgElement(svg, id, message.origin))
+      // Last edited is destructured with a default value to prevent undefined from old data
+      .map(({ svg, id, lastEdited = new Date().toISOString() }) =>
+        this.createSvgElement(svg, id, lastEdited, message.origin),
+      )
       .filter((item): item is SvgType => !!item)
 
     // If an item is an Image, fetch its SVG content; otherwise, leave it as is
@@ -40,7 +42,12 @@ class SvgFactory {
   /**
    * Process a single SVG element and return an SVG class.
    */
-  private createSvgElement(svg: string, id: string, origin?: string): SvgType | null {
+  private createSvgElement(
+    svg: string,
+    id: string,
+    lastEdited: string,
+    origin: string,
+  ): SvgType | null {
     try {
       const parser = new DOMParser()
       const doc = parser.parseFromString(svg, 'image/svg+xml')
@@ -48,13 +55,13 @@ class SvgFactory {
 
       switch (tagName) {
         case 'svg':
-          return new Inline(svg, id)
+          return new Inline(svg, id, lastEdited)
         case 'symbol':
-          return new SvgSymbol(svg, id)
+          return new SvgSymbol(svg, id, lastEdited)
         case 'g':
-          return new GElement(svg, id)
+          return new GElement(svg, id, lastEdited)
         case 'img':
-          return new Image(svg, id, origin ?? '')
+          return new Image(svg, id, lastEdited, origin)
         default:
           return null
       }
@@ -92,7 +99,9 @@ class SvgFactory {
     const elements = image.asElement?.querySelectorAll(selector)
     elements?.forEach((element) => {
       const constructor = selector === 'symbol' ? SvgSymbol : GElement
-      results.push(new constructor(element.outerHTML, nanoid()))
+      results.push(
+        new constructor(element.outerHTML, crypto.randomUUID(), new Date().toISOString()),
+      )
     })
   }
 }

@@ -36,8 +36,8 @@ export class Svg {
    */
   public corsRestricted = false
 
-  constructor(originalString: string, id: string, lastEdited?: string) {
-    this.lastEdited = lastEdited || new Date().toISOString()
+  constructor(originalString: string, id: string, lastEdited: string) {
+    this.lastEdited = lastEdited
     this.id = id
     this.originalString = originalString
   }
