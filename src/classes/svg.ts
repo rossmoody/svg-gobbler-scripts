@@ -5,6 +5,11 @@
  */
 export class Svg {
   /**
+   * Last edited date. Defaults to creation date.
+   */
+  public lastEdited: string
+
+  /**
    * A unique identifier. This must be supplied as a matching identifier
    * from the SVG element in storage.
    */
@@ -31,7 +36,8 @@ export class Svg {
    */
   public corsRestricted = false
 
-  constructor(originalString: string, id: string) {
+  constructor(originalString: string, id: string, lastEdited?: string) {
+    this.lastEdited = lastEdited || new Date().toISOString()
     this.id = id
     this.originalString = originalString
   }
