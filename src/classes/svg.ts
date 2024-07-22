@@ -5,6 +5,11 @@
  */
 export class Svg {
   /**
+   * The name of the SVG element. Defaults to the id
+   * if not supplied.
+   */
+  public name: string
+  /**
    * Last edited date. Defaults to creation date.
    */
   public lastEdited: string
@@ -38,7 +43,7 @@ export class Svg {
 
   constructor(originalString: string, id: string, lastEdited: string) {
     this.lastEdited = lastEdited
-    this.id = id
+    this.id = this.name = id
     this.originalString = originalString
   }
 

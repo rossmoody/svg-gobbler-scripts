@@ -20,6 +20,10 @@ export type StorageSvg = {
    * The svg string of the item.
    */
   svg: string
+  /**
+   * The name of the item. Defaults to ID on creation.
+   */
+  name: string
 }
 
 /**
