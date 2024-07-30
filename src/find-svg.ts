@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid'
 import type { DocumentData } from './types'
 
 /**
@@ -115,10 +116,9 @@ export function findSvg(documentParam?: Document): DocumentData {
   return {
     host: document.location?.host ?? '',
     origin: document.location?.origin ?? '',
-    data: data.map((svgString) => ({
-      id: crypto.randomUUID(),
-      lastEdited: new Date().toISOString(),
-      svg: svgString,
-    })),
+    data: data.map((svg) => {
+      const id = nanoid()
+      return { id, lastEdited: new Date().toISOString(), svg, name: id }
+    }),
   }
 }
