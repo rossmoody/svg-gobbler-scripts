@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid'
 import { Svg } from './svg'
 
 export class SvgSymbol extends Svg {
@@ -15,7 +14,7 @@ export class SvgSymbol extends Svg {
     const symbol = this.parseFromString()
     if (!symbol) return
 
-    const id = nanoid()
+    const id = crypto.randomUUID()
     const svg = this.createSvgElement()
     const useElement = this.createUseElement(id)
     symbol.setAttribute('id', id)

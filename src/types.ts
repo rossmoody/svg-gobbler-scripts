@@ -39,10 +39,15 @@ export type DocumentData = {
    */
   host: string
   /**
-   * The origin of the document. This is used to rebuild the SVGs in the
-   * content script. Especially related to image sources and cors restrictions.
+   * A string containing the canonical form of the origin of the specific location.
+   * This is used to rebuild the SVGs in the content script. Especially related to
+   * image sources and cors restrictions.
    */
   origin: string
+  /**
+   * The specific URL of the document. Used in merging collections based on the URL.
+   */
+  href: string
 }
 
 /**

@@ -1,7 +1,7 @@
 {
   "name": "svg-gobbler-scripts",
   "description": "Centralized SVG processing scripts for svg-gobbler initiatives.",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "repository": "https://github.com/rossmoody/svg-gobbler-scripts.git",
   "author": "rossmoody <ross@rossmoody.com>",
   "license": "MIT",
@@ -23,8 +23,5 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "nanoid": "^5.0.4"
   }
 }
